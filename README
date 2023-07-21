@@ -1,0 +1,64 @@
+/*
+|--------------------------------------------------------------------------
+| docker
+|--------------------------------------------------------------------------
+
+|  FROM php:7.1.23-apache
+|  COPY . /var/www/html
+|  ENTRYPOINT echo "ServerName 127.0.0.1:80" >> /etc/apache2/apache2.conf && a2enmod rewrite && service apache2 restart && apache2ctl stop && apache2ctl -D | FOREGROUND
+|
+|  $ docker push gcr.io/suqi-production/php:7.1.23-apache
+|  $ docker build -f Dockerfile -t gcr.io/suqi-production/php:7.1.23-apache-v4 ./suqi-tracking-order-maps-php/
+|
+|  $ kubectl apply -f deployment.yaml (check deployment file below)
+|
+|  $ kubectl run --namespace maps suqi-prod-php-maps --tty -i --image gcr.io/suqi-production/php:7.1.23-apache-v4
+|
+|  $ kubectl label pods suqi-prod-php-maps app=suqi-prod-php-maps -n maps
+|  $ kubectl exec --stdin --tty suqi-prod-php-maps --namespace maps -- sh
+|
+|  $ a2enmod rewrite && service apache2 restart
+|
+|  $ apache2ctl stop
+|  $ apache2ctl start
+|  $ apache2ctl -D FOREGROUND
+|  $ echo "ServerName 127.0.0.1:80" >> /etc/apache2/apache2.conf
+|
+|  $ kubectl expose pod suqi-prod-php-maps --namespace maps --type=LoadBalancer --name=suqi-prod-php-maps-svc --port 80
+|  $ kubectl exec --stdin --tty suqi-prod-php-maps --namespace maps -- sh
+|
+|
+|  clean
+|  $ kubectl delete pod suqi-prod-php-maps -n maps
+|  $ kubectl delete deploy/suqi-prod-php-maps -n maps
+|  $ kubectl delete svc/suqi-prod-php-maps-svc -n maps
+
+|  garbage collector issue fixed
+|
+|  $ kubectl get pods/suqi-prod-php-maps-798656b977-h46k7 -n maps -o json | jq -r '.metadata.ownerReferences'
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: maps
+  name: suqi-prod-php-maps
+  labels:
+    name: suqi-prod-php-maps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: suqi-prod-php-maps
+  template:
+    metadata:
+      labels:
+        name: suqi-prod-php-maps
+    spec:
+      containers:
+      - name: suqi-prod-php-maps
+        image: gcr.io/suqi-production/php:7.1.23-apache-v4
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http

@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment # Kubernetes resource kind we are creating
+metadata:
+  name: {{ $.Values.api.name }}-dep
+  namespace: amo-maps
+  labels:
+    app: {{ $.Values.api.name }}
+    #chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    #release: "{{ .Release.Name }}"
+    #heritage: "{{ .Release.Service }}"
+spec:
+  selector:
+    matchLabels:
+      app: {{ $.Values.api.name }}
+      release: {{ .Release.Name }}
+  replicas: {{ .Values.api.replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.api.name }}
+        release: {{ .Release.Name }}
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: {{ $.Values.api.name }}
+          image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+          imagePullPolicy: Always #IfNotPresent
+          ports:
+            - name: http
+              containerPort: {{ .Values.api.target_port }}
+              protocol: TCP
+
+
+

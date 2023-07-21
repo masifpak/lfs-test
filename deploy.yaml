@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: maps
+  name: amo-prod-php-maps
+  labels:
+    name: amp-prod-php-maps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: amo-prod-php-maps
+  template:
+    metadata:
+      labels:
+        name: amo-prod-php-maps
+    spec:
+      containers:
+      - name: amo-prod-php-maps
+        image: gcr.io/amo-production/tracking-order-maps
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http

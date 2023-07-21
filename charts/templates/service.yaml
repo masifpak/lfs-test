@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Values.api.name }}
+  namespace: amo-maps
+  labels:
+    app: {{ $.Values.api.name }}
+    #chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.api.service_type }}
+  ports:
+    #- port: {{ $.Values.api.https_port }}
+    #  targetPort: {{ $.Values.api.target_port }}
+    #  name: https
+    - port: {{ $.Values.api.port }}
+      targetPort: {{ $.Values.api.target_port }}
+      name: http
+  selector:
+    app: {{ $.Values.api.name }}
+    release: {{ .Release.Name }}

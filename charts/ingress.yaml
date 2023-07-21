@@ -1,0 +1,34 @@
+{{- if .Values.ingress -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}-ingress
+  namespace: maps
+  labels:
+    app: {{ include "chart.name" . }}
+    #chart: {{ include "chart.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    ingress.kubernetes.io/enable-cors: {{ .Values.ingress.enableCors | quote }}
+    nginx.ingress.kubernetes.io/ssl-redirect: {{ .Values.ingress.sslRedirect | quote }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingress.proxyBodySize | quote }}
+spec:
+  ingressClassName: {{ .Values.ingress.class }}
+  rules:
+    - host: {{ .Values.ingress.name }}.{{ .Values.ingress.domain }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ .Values.api.name }}
+                port:
+                  number: {{ .Values.ingress.port }}
+            path: {{ .Values.ingress.rule_path }}
+            pathType: {{ .Values.ingress.pathType }}
+   # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+    - hosts:
+      - {{ .Values.ingress.name }}.{{ .Values.ingress.domain }}
+      secretName: {{ .Values.ingress.secretName }}
+{{- end }}

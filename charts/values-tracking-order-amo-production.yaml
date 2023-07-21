@@ -1,0 +1,21 @@
+api:
+  name: tracking-order-maps
+  service_type: LoadBalancer
+  port: 80
+  https_port: 443
+  target_port: 80
+  image: gcr.io/suqi-production/amo-tracking-order-maps-test
+  tag : v1.4
+  replicas: 1
+ingress:
+  enable: false
+  name: m
+  class: amo-prod-api
+  domain: amo.store
+  port: 80
+  pathType: ImplementationSpecific
+  secretName: amo-prod-api-tls
+  enableCors: true
+  proxyBodySize: 30m
+  sslRedirect: false
+  rule_path: /
